@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ストレステスト｜あなたのポートフォリオは過去の暴落に耐えられるか</title>
+<title>暴落シミュレーター｜あなたのポートフォリオは過去の暴落に耐えられるか</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root {
     --bg:      #0e1117;
@@ -32,7 +33,6 @@
   .serif { font-family:"Noto Serif JP",serif; }
   .wrap { max-width:600px; margin:0 auto; padding:0 20px; }
 
-  /* ---------- header ---------- */
   header {
     text-align:center; padding:48px 0 36px;
     background:radial-gradient(120% 80% at 50% 0%, #1c2533 0%, var(--bg) 70%);
@@ -43,13 +43,9 @@
     font-weight:700; margin-bottom:18px; padding-left:0.34em;
   }
   h1 { font-size:clamp(26px,7vw,36px); font-weight:900; line-height:1.42; }
-  h1 .u {
-    background:linear-gradient(transparent 60%, var(--red-dim) 60%);
-    padding:0 2px;
-  }
+  h1 .u { background:linear-gradient(transparent 60%, var(--red-dim) 60%); padding:0 2px; }
   .lede { margin-top:18px; font-size:15px; color:var(--ink-2); line-height:1.85; }
 
-  /* ---------- section ---------- */
   section { padding:36px 0; }
   section + section { border-top:1px solid var(--line); }
   .step-head { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
@@ -62,7 +58,6 @@
   h2 { font-size:22px; font-weight:700; }
   .hint { font-size:14.5px; color:var(--ink-2); margin-bottom:22px; line-height:1.8; }
 
-  /* ---------- asset inputs ---------- */
   .asset {
     display:grid; grid-template-columns:1fr 150px; gap:14px;
     align-items:center; padding:16px 0; border-top:1px solid var(--line);
@@ -93,7 +88,6 @@
   .total .v { font-size:27px; font-weight:900; }
   .total .v .s { font-size:14px; color:var(--ink-2); font-weight:500; }
 
-  /* ---------- scenario cards ---------- */
   .scn-grid { display:grid; gap:13px; }
   .scn {
     cursor:pointer; text-align:left; width:100%;
@@ -106,15 +100,13 @@
   .scn:active { background:var(--panel-2); }
   .scn.active { border-color:var(--red); background:var(--panel-2); }
   .scn.active::before {
-    content:""; position:absolute; left:0; top:0; bottom:0; width:5px;
-    background:var(--red);
+    content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--red);
   }
   .scn-top { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
   .scn-name { font-size:18px; font-weight:800; }
   .scn-yr { font-size:13px; color:var(--ink-2); font-family:"Noto Serif JP",serif; white-space:nowrap; }
   .scn-desc { font-size:14.5px; color:var(--ink-2); margin-top:7px; line-height:1.75; }
 
-  /* ---------- result ---------- */
   #result { display:none; }
   #result.show { display:block; animation:fade .5s ease; }
   @keyframes fade { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
@@ -163,10 +155,7 @@
     font-size:15px;
   }
   .bd-row .nm { color:var(--ink); }
-  .bd-row .lo {
-    text-align:right; font-weight:800;
-    font-family:"Noto Serif JP",serif; white-space:nowrap;
-  }
+  .bd-row .lo { text-align:right; font-weight:800; font-family:"Noto Serif JP",serif; white-space:nowrap; }
   .bd-row .lo.neg { color:var(--red); }
   .bd-row .lo.pos { color:var(--green); }
   .bd-row .rt { text-align:right; font-size:13px; color:var(--ink-2); white-space:nowrap; }
@@ -179,7 +168,7 @@
   .note b { color:var(--ink); font-weight:700; }
   .note .fine { display:block; margin-top:12px; font-size:13px; color:var(--ink-3); }
 
-  /* ---------- what-if sliders ---------- */
+  /* ---- what-if sliders ---- */
   .whatif { margin-top:30px; }
   .whatif-head { font-size:18px; font-weight:800; margin-bottom:6px; }
   .whatif-sub {
@@ -230,7 +219,6 @@
     font-family:inherit; cursor:pointer;
   }
   .reset-btn:active { background:var(--panel); }
-
   .whatif-result {
     margin-top:18px; padding:20px;
     background:var(--panel-2); border:1.5px solid var(--line);
@@ -253,26 +241,98 @@
   }
   .whatif-msg b { font-weight:700; }
 
+  /* ---- share ---- */
+  .share { margin-top:30px; }
+  .share-head { font-size:18px; font-weight:800; margin-bottom:6px; }
+  .share-sub { font-size:14px; color:var(--ink-2); margin-bottom:18px; line-height:1.8; }
+  .share-sub b { color:var(--ink); font-weight:700; }
+  .share-btns { display:grid; gap:11px; }
+  .sbtn {
+    width:100%; padding:15px; border-radius:11px;
+    font-family:inherit; font-size:15.5px; font-weight:700;
+    cursor:pointer; border:1.5px solid var(--line);
+    display:flex; align-items:center; justify-content:center; gap:9px;
+  }
+  .sbtn:active { transform:scale(.99); }
+  .sbtn.primary { background:var(--gold); color:var(--bg); border-color:var(--gold); }
+  .sbtn.sub { background:var(--panel-2); color:var(--ink); }
+  .sbtn.busy { opacity:.6; }
+  .share-status {
+    margin-top:12px; text-align:center; font-size:13.5px;
+    color:var(--ink-2); min-height:1.2em;
+  }
+  .share-privacy {
+    margin-top:14px; font-size:12.5px; color:var(--ink-3);
+    text-align:center; line-height:1.7;
+  }
+  /* 生成プレビュー */
+  #sharePreview { margin-top:16px; text-align:center; display:none; }
+  #sharePreview.show { display:block; }
+  #sharePreview img {
+    max-width:100%; border-radius:12px; border:1.5px solid var(--line);
+  }
+  #sharePreview .pv-note {
+    font-size:12.5px; color:var(--ink-2); margin-top:9px;
+  }
+
   .again {
     margin-top:22px; text-align:center; font-size:14px;
     color:var(--ink-2); line-height:1.75;
   }
-
-  footer {
-    text-align:center; padding:36px 20px 0;
-    font-size:13px; color:var(--ink-2);
-  }
+  footer { text-align:center; padding:36px 20px 0; font-size:13px; color:var(--ink-2); }
   .disclaimer {
     max-width:560px; margin:14px auto 0; font-size:12px;
     color:var(--ink-3); line-height:1.85;
   }
+
+  /* ---- offscreen share card (画像化される本体) ---- */
+  #cardStage {
+    position:fixed; left:-9999px; top:0;
+    width:1080px; height:1080px;
+  }
+  .card {
+    width:1080px; height:1080px;
+    background:linear-gradient(160deg,#1c2533 0%,#0e1117 70%);
+    color:#f1efe9; padding:90px 84px;
+    display:flex; flex-direction:column;
+    font-family:"Noto Sans JP",sans-serif;
+  }
+  .card-eyebrow {
+    font-size:26px; letter-spacing:0.3em; color:#e0b452;
+    font-weight:700; margin-bottom:8px;
+  }
+  .card-title {
+    font-family:"Noto Serif JP",serif; font-size:50px;
+    font-weight:900; line-height:1.4;
+  }
+  .card-mid { flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .card-scn { font-size:34px; color:#c4cad4; margin-bottom:10px; }
+  .card-pct {
+    font-family:"Noto Serif JP",serif; font-weight:900;
+    font-size:240px; line-height:1; color:#ff5448;
+  }
+  .card-left {
+    font-size:36px; color:#c4cad4; margin-top:18px;
+  }
+  .card-left b { color:#f1efe9; }
+  .card-cardbar {
+    margin-top:34px; height:46px; width:100%;
+    background:#7a2620; border-radius:10px; overflow:hidden;
+  }
+  .card-cardbar > div { height:100%; background:#57c596; }
+  .card-foot {
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-top:40px;
+  }
+  .card-tool { font-family:"Noto Serif JP",serif; font-size:36px; font-weight:800; }
+  .card-url { font-size:28px; color:#8d96a4; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap">
-    <div class="eyebrow">PORTFOLIO STRESS TEST</div>
+    <div class="eyebrow">CRASH SIMULATOR</div>
     <h1 class="serif">過去の暴落が<span class="u">いま起きたら</span>、<br>あなたの資産はいくら残るか</h1>
     <p class="lede">リーマン・コロナ・ITバブルの下落を、<br>あなたのいまの資産に当てはめて試算します。</p>
   </div>
@@ -280,7 +340,6 @@
 
 <div class="wrap">
 
-  <!-- STEP 1 -->
   <section>
     <div class="step-head"><span class="step-no">1</span><h2>いまの資産を入力</h2></div>
     <p class="hint">ざっくりで構いません。持っていない資産は空のままでOKです。単位は万円。</p>
@@ -291,14 +350,12 @@
     </div>
   </section>
 
-  <!-- STEP 2 -->
   <section>
     <div class="step-head"><span class="step-no">2</span><h2>暴落シナリオを選ぶ</h2></div>
     <p class="hint">同じ「暴落」でも、下げる資産と守られる資産はまるで違います。</p>
     <div class="scn-grid" id="scenarios"></div>
   </section>
 
-  <!-- RESULT -->
   <section id="result">
     <div class="step-head"><span class="step-no">✓</span><h2>試算結果</h2></div>
 
@@ -341,6 +398,23 @@
       </div>
     </div>
 
+    <!-- SHARE -->
+    <div class="share">
+      <div class="share-head serif">結果をシェアする</div>
+      <p class="share-sub">下落率だけを載せた画像を作ります。<b>①で画像をつくり、②で保存</b>。あとはXアプリを開いて投稿に画像を添付し、③でコピーした文章を貼り付ければ完成です。</p>
+      <div class="share-btns">
+        <button class="sbtn primary" id="genBtn">① シェア画像をつくる</button>
+        <button class="sbtn sub" id="shareBtn">② 画像を保存する</button>
+        <button class="sbtn sub" id="textBtn">③ 文章とURLをコピー</button>
+      </div>
+      <div class="share-status" id="shareStatus"></div>
+      <div id="sharePreview">
+        <img id="shareImg" alt="シェア画像プレビュー">
+        <div class="pv-note">この画像が作成されました。「② 画像を保存する」で端末に保存できます。うまくいかないときは、上の画像を長押しして保存することもできます。</div>
+      </div>
+      <p class="share-privacy">画像・文章ともに下落率（％）のみで、入力した金額は一切含まれません。</p>
+    </div>
+
     <p class="again">STEP 1 の数字を書き換えれば、ゼロから再計算もできます。</p>
   </section>
 
@@ -350,12 +424,35 @@
   入力した数字はこの端末内だけで処理され、どこにも送信・保存されません。
   <div class="disclaimer">
     本ツールは過去の代表的な下落率にもとづく概算であり、将来の結果や特定の暴落を予測・保証するものではありません。
-    各資産の下落率は歴史的なおおよその値です。「もし、配分を変えていたら」の試算も過去データにもとづく仮定の計算です。
+    各資産の下落率は歴史的なおおよその値です。
     本ツールは特定の金融商品の売買を推奨するものではなく、投資助言を行うものではありません。投資判断はご自身の責任で行ってください。
   </div>
 </footer>
 
+<!-- 画像化される結果カード（画面外） -->
+<div id="cardStage">
+  <div class="card" id="card">
+    <div>
+      <div class="card-eyebrow">CRASH SIMULATOR</div>
+      <div class="card-title">過去の暴落がいま起きたら</div>
+    </div>
+    <div class="card-mid">
+      <div class="card-scn" id="cardScn"></div>
+      <div class="card-pct" id="cardPct"></div>
+      <div class="card-left" id="cardLeft"></div>
+      <div class="card-cardbar"><div id="cardBar"></div></div>
+    </div>
+    <div class="card-foot">
+      <span class="card-tool serif">暴落シミュレーター</span>
+      <span class="card-url" id="cardUrl"></span>
+    </div>
+  </div>
+</div>
+
 <script>
+  // ===== 公開URL：GitHub Pages のURLに書き換えてください =====
+  const SITE_URL = location.origin + location.pathname;
+
   const ASSETS = [
     { id:"world",  name:"全世界株（オルカン等）" },
     { id:"us",     name:"米国株インデックス（S&P500等）" },
@@ -390,8 +487,15 @@
     },
   ];
 
-  /* スライダー定義。
-     value（0〜max %）を受け取り、元配分 v を変換した配分を返す。
+  const sum = v => KEYS.reduce((s,k)=>s+(v[k]||0),0);
+  const fmt = n => Math.round(n).toLocaleString("ja-JP");
+  function lossOf(v, s){
+    let loss = 0;
+    KEYS.forEach(k => loss += (v[k]||0) * (s.rates[k]||0) / 100);
+    return loss;
+  }
+
+  /* スライダー定義。value(0〜max %)を受け取り、元配分 v を変換した配分を返す。
      いずれも資産総額を保存する（移すだけ）。 */
   const SLIDERS = [
     {
@@ -399,10 +503,8 @@
       label:"現金の比率",
       desc:"値動きの大きい資産から取り崩して現金クッションを厚くする",
       min:0, max:50, step:5, unit:"%",
-      // 利用可能か（リスク資産がある程度ないと意味がない）
       enabled:v => ["world","us","jp","single","crypto"].reduce((s,k)=>s+v[k],0) > 0,
       naMsg:"取り崩せる株式・暗号資産がないため調整できません",
-      // 現状の現金比率を初期値に
       initial:v => { const t=sum(v); return t>0 ? Math.round(v.cash/t*100/5)*5 : 0; },
       apply(v, pct){
         const t = sum(v);
@@ -410,13 +512,11 @@
         const n = {...v};
         const rk = ["crypto","single","us","jp","world"];
         if (target >= v.cash){
-          // 現金を増やす：リスク資産から比例で取り崩す
           let pool = rk.reduce((s,k)=>s+n[k],0);
           const need = Math.min(target - v.cash, pool);
           if (pool>0) rk.forEach(k => n[k] -= need*(n[k]/pool));
           n.cash += (pool>0?need:0);
         } else {
-          // 現金を減らす：全世界株へ回す
           const move = v.cash - target;
           n.cash -= move;
           n.world += move;
@@ -459,15 +559,6 @@
       }
     },
   ];
-
-  // ---- helpers ----
-  const sum = v => KEYS.reduce((s,k)=>s+(v[k]||0),0);
-  const fmt = n => Math.round(n).toLocaleString("ja-JP");
-  function lossOf(v, s){
-    let loss = 0;
-    KEYS.forEach(k => loss += (v[k]||0) * (s.rates[k]||0) / 100);
-    return loss;
-  }
 
   // STEP1
   const assetsEl = document.getElementById("assets");
@@ -517,6 +608,9 @@
     scnEl.appendChild(b);
   });
 
+  const reRun = () => { if (active) run(active); };
+  let lastResult = null;   // {scnName, year, pct, after, t}
+
   // ---- スライダー生成 ----
   const slidersEl = document.getElementById("sliders");
   const sliderInputs = {};
@@ -542,27 +636,23 @@
       renderWhatif();
     });
   });
-
   document.getElementById("resetBtn").addEventListener("click", () => {
     initSliders();
     renderWhatif();
   });
-
-  const reRun = () => { if (active) run(active); };
 
   // スライダーの初期値・有効/無効を、現在の入力に合わせて設定
   function initSliders() {
     const v = getVals();
     SLIDERS.forEach(sl => {
       const inp = sliderInputs[sl.id];
-      const ok = sl.enabled(v);
+      const ok  = sl.enabled(v);
       const box = document.getElementById("sb-"+sl.id);
       const na  = document.getElementById("na-"+sl.id);
       if (ok) {
         box.classList.remove("slider-disabled");
         na.style.display = "none";
-        const init = Math.min(sl.max, Math.max(sl.min, sl.initial(v)));
-        inp.value = init;
+        inp.value = Math.min(sl.max, Math.max(sl.min, sl.initial(v)));
       } else {
         box.classList.add("slider-disabled");
         na.style.display = "block";
@@ -575,67 +665,14 @@
   // スライダーをすべて順に適用した配分
   function appliedVals() {
     let v = getVals();
+    const base = getVals();
     SLIDERS.forEach(sl => {
-      if (!sl.enabled(getVals())) return;
+      if (!sl.enabled(base)) return;
       const pct = Number(sliderInputs[sl.id].value);
       v = sl.apply(v, pct);
-      // 微小な負値を丸める
       KEYS.forEach(k => { if (v[k] < 0.0001) v[k] = 0; });
     });
     return v;
-  }
-
-  function run(s) {
-    const v = getVals(), t = sum(v);
-    if (t <= 0) { alert("STEP 1 で資産を入力してください。"); return; }
-
-    initSliders();
-
-    const loss = lossOf(v, s);
-    const after = t - loss;
-    const pct = loss / t * 100;
-
-    document.getElementById("rName").textContent = s.name + "（" + s.year + "）が再来したら";
-    document.getElementById("rLoss").innerHTML =
-      (loss >= 0 ? "−" : "＋") + `<span class="y">¥</span>` + fmt(Math.abs(loss)) + "万";
-    document.getElementById("rSub").innerHTML =
-      `資産合計 <b>${fmt(t)}万円</b> が約 <b>${Math.abs(pct).toFixed(1)}%</b> ` +
-      (loss >= 0 ? "目減り" : "増加") + `<br>残り <b>${fmt(after)}万円</b>`;
-
-    const left = Math.max(0, Math.min(100, after / t * 100));
-    requestAnimationFrame(() => document.getElementById("barFill").style.width = left + "%");
-    document.getElementById("barVal").textContent = fmt(after) + "万円（" + left.toFixed(0) + "%）";
-
-    // 内訳
-    const rows = [];
-    ASSETS.forEach(a => {
-      if (v[a.id] <= 0) return;
-      const rate = s.rates[a.id] || 0;
-      rows.push({ name:a.name, rate, l:v[a.id]*rate/100 });
-    });
-    const bd = document.getElementById("bdRows");
-    bd.innerHTML = "";
-    rows.sort((a,b) => b.l - a.l).forEach(r => {
-      const neg = r.l >= 0;
-      const el = document.createElement("div");
-      el.className = "bd-row";
-      el.innerHTML = `
-        <span class="nm">${r.name}</span>
-        <span class="lo ${neg?'neg':'pos'}">${neg?'−':'＋'}${fmt(Math.abs(r.l))}万</span>
-        <span class="rt">${r.rate>=0?'-':'+'}${Math.abs(r.rate)}%</span>`;
-      bd.appendChild(el);
-    });
-
-    let note = s.comment;
-    if (s.cryptoNote && v.crypto > 0)
-      note += `<span class="fine">※ 暗号資産は当時存在しなかったため、参考値として全世界株並みの下落で計算しています。</span>`;
-    document.getElementById("note").innerHTML = note;
-
-    renderWhatif();
-
-    const res = document.getElementById("result");
-    res.classList.add("show");
-    res.scrollIntoView({ behavior:"smooth", block:"start" });
   }
 
   // ---- 「もし、配分を変えていたら」の再計算 ----
@@ -678,6 +715,152 @@
       badge.classList.remove("show");
     }
   }
+
+  function run(s) {
+    const v = getVals(), t = sum(v);
+    if (t <= 0) { alert("STEP 1 で資産を入力してください。"); return; }
+
+    const loss = lossOf(v, s);
+    const after = t - loss;
+    const pct = loss / t * 100;
+    lastResult = { scnName:s.name, year:s.year, pct, after, t };
+
+    document.getElementById("rName").textContent = s.name + "（" + s.year + "）が再来したら";
+    document.getElementById("rLoss").innerHTML =
+      (loss >= 0 ? "−" : "＋") + `<span class="y">¥</span>` + fmt(Math.abs(loss)) + "万";
+    document.getElementById("rSub").innerHTML =
+      `資産合計 <b>${fmt(t)}万円</b> が約 <b>${Math.abs(pct).toFixed(1)}%</b> ` +
+      (loss >= 0 ? "目減り" : "増加") + `<br>残り <b>${fmt(after)}万円</b>`;
+
+    const left = Math.max(0, Math.min(100, after / t * 100));
+    requestAnimationFrame(() => document.getElementById("barFill").style.width = left + "%");
+    document.getElementById("barVal").textContent = fmt(after) + "万円（" + left.toFixed(0) + "%）";
+
+    const rows = [];
+    ASSETS.forEach(a => {
+      if (v[a.id] <= 0) return;
+      const rate = s.rates[a.id] || 0;
+      rows.push({ name:a.name, rate, l:v[a.id]*rate/100 });
+    });
+    const bd = document.getElementById("bdRows");
+    bd.innerHTML = "";
+    rows.sort((a,b) => b.l - a.l).forEach(r => {
+      const neg = r.l >= 0;
+      const el = document.createElement("div");
+      el.className = "bd-row";
+      el.innerHTML = `
+        <span class="nm">${r.name}</span>
+        <span class="lo ${neg?'neg':'pos'}">${neg?'−':'＋'}${fmt(Math.abs(r.l))}万</span>
+        <span class="rt">${r.rate>=0?'-':'+'}${Math.abs(r.rate)}%</span>`;
+      bd.appendChild(el);
+    });
+
+    let note = s.comment;
+    if (s.cryptoNote && v.crypto > 0)
+      note += `<span class="fine">※ 暗号資産は当時存在しなかったため、参考値として全世界株並みの下落で計算しています。</span>`;
+    document.getElementById("note").innerHTML = note;
+
+    // スライダーを現在の入力に合わせて初期化し、再計算
+    initSliders();
+    renderWhatif();
+
+    // シェア状態をリセット
+    document.getElementById("sharePreview").classList.remove("show");
+    document.getElementById("shareStatus").textContent = "";
+    generatedBlob = null;
+
+    const res = document.getElementById("result");
+    res.classList.add("show");
+    res.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  // ===== シェア画像生成 =====
+  let generatedBlob = null;
+
+  const shareText = () => {
+    if (!lastResult) return "";
+    const r = lastResult;
+    const sign = r.pct >= 0 ? "−" : "＋";
+    return `過去の暴落（${r.scnName}）がいま起きたら、私のポートフォリオは約${sign}${Math.abs(r.pct).toFixed(1)}%。`
+         + `\nあなたの資産はどれくらい耐えられる？\n${SITE_URL}`;
+  };
+
+  function fillCard() {
+    const r = lastResult;
+    const sign = r.pct >= 0 ? "−" : "＋";
+    document.getElementById("cardScn").textContent = r.scnName + "（" + r.year + "）が再来したら";
+    document.getElementById("cardPct").textContent = sign + Math.abs(r.pct).toFixed(1) + "%";
+    document.getElementById("cardLeft").innerHTML =
+      "資産は <b>" + Math.max(0, 100 - r.pct).toFixed(0) + "%</b> まで目減り";
+    const left = Math.max(0, Math.min(100, r.after / r.t * 100));
+    document.getElementById("cardBar").style.width = left + "%";
+    document.getElementById("cardUrl").textContent = SITE_URL.replace(/^https?:\/\//,"");
+  }
+
+  document.getElementById("genBtn").addEventListener("click", async () => {
+    if (!lastResult) { alert("先に暴落シナリオを選んでください。"); return; }
+    const status = document.getElementById("shareStatus");
+    const genBtn = document.getElementById("genBtn");
+    genBtn.classList.add("busy");
+    status.textContent = "画像を生成しています…";
+    try {
+      fillCard();
+      // フォント読み込み完了を待つ（崩れ対策）
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      await new Promise(r => setTimeout(r, 120));
+
+      const canvas = await html2canvas(document.getElementById("card"), {
+        width:1080, height:1080, scale:1,
+        backgroundColor:"#0e1117", useCORS:true
+      });
+      generatedBlob = await new Promise(res => canvas.toBlob(res, "image/png"));
+
+      document.getElementById("shareImg").src = canvas.toDataURL("image/png");
+      document.getElementById("sharePreview").classList.add("show");
+      status.textContent = "画像ができました。「② 画像を保存・共有する」から投稿できます。";
+    } catch (e) {
+      status.textContent = "画像の生成に失敗しました。「文章とURLだけコピー」でのシェアをお試しください。";
+    } finally {
+      genBtn.classList.remove("busy");
+    }
+  });
+
+  document.getElementById("shareBtn").addEventListener("click", async () => {
+    const status = document.getElementById("shareStatus");
+    if (!generatedBlob) { status.textContent = "先に「① シェア画像をつくる」を押してください。"; return; }
+    const file = new File([generatedBlob], "stress-test.png", { type:"image/png" });
+
+    // 対応環境ならネイティブ共有シートも試す（画像つき）
+    if (navigator.canShare && navigator.canShare({ files:[file] })) {
+      try {
+        await navigator.share({ files:[file], text:shareText() });
+        status.textContent = "共有しました。";
+        return;
+      } catch (e) { /* キャンセル・非対応時は保存にフォールバック */ }
+    }
+    // 保存（こちらが基本動作）
+    const url = URL.createObjectURL(generatedBlob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "stress-test.png";
+    a.click();
+    URL.revokeObjectURL(url);
+    status.textContent =
+      "画像を保存しました。次に Xアプリを開いて投稿画面で画像を添付し、"
+      + "「③ 文章とURLをコピー」でコピーした文章を貼り付ければ投稿できます。";
+  });
+
+  document.getElementById("textBtn").addEventListener("click", async () => {
+    const status = document.getElementById("shareStatus");
+    const txt = shareText();
+    if (!txt) { alert("先に暴落シナリオを選んでください。"); return; }
+    try {
+      await navigator.clipboard.writeText(txt);
+      status.textContent = "文章とURLをコピーしました。Xの投稿画面に貼り付けてください。";
+    } catch (e) {
+      // クリップボード不可の環境向けにXの投稿画面を開く
+      window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(txt), "_blank");
+    }
+  });
 </script>
 </body>
 </html>
