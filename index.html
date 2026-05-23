@@ -401,16 +401,16 @@
     <!-- SHARE -->
     <div class="share">
       <div class="share-head serif">結果をシェアする</div>
-      <p class="share-sub">下落率だけを載せた画像を作ります。<b>①で画像をつくり、②で保存</b>。あとはXアプリを開いて投稿に画像を添付し、③でコピーした文章を貼り付ければ完成です。</p>
+      <p class="share-sub">下落率だけを載せた画像を作ります。<b>①で画像をつくり、②を押すと画像が保存され、Xの投稿画面が文章入りで開きます。</b>あとは保存した画像を添付して投稿するだけです。</p>
       <div class="share-btns">
         <button class="sbtn primary" id="genBtn">① シェア画像をつくる</button>
-        <button class="sbtn sub" id="shareBtn">② 画像を保存する</button>
-        <button class="sbtn sub" id="textBtn">③ 文章とURLをコピー</button>
+        <button class="sbtn sub" id="shareBtn">② 画像を保存して X を開く</button>
+        <button class="sbtn sub" id="textBtn">文章とURLだけコピー（画像なし）</button>
       </div>
       <div class="share-status" id="shareStatus"></div>
       <div id="sharePreview">
         <img id="shareImg" alt="シェア画像プレビュー">
-        <div class="pv-note">この画像が作成されました。「② 画像を保存する」で端末に保存できます。うまくいかないときは、上の画像を長押しして保存することもできます。</div>
+        <div class="pv-note">この画像が作成されました。「② 画像を保存して X を開く」を押すと、画像が保存され Xの投稿画面が開きます。保存した画像を添付して投稿してください。（画像保存がうまくいかないときは、上の画像を長押しでも保存できます）</div>
       </div>
       <p class="share-privacy">画像・文章ともに下落率（％）のみで、入力した金額は一切含まれません。</p>
     </div>
@@ -777,13 +777,23 @@
   // ===== シェア画像生成 =====
   let generatedBlob = null;
 
-  const shareText = () => {
+  // シェア用の本文（URLは含めない）
+  const shareBody = () => {
     if (!lastResult) return "";
     const r = lastResult;
     const sign = r.pct >= 0 ? "−" : "＋";
     return `過去の暴落（${r.scnName}）がいま起きたら、私のポートフォリオは約${sign}${Math.abs(r.pct).toFixed(1)}%。`
-         + `\nあなたの資産はどれくらい耐えられる？\n${SITE_URL}`;
+         + `\nあなたの資産はどれくらい耐えられる？`;
   };
+  // 本文＋URL（コピー用）
+  const shareText = () => {
+    const b = shareBody();
+    return b ? b + `\n${SITE_URL}` : "";
+  };
+  // Xの投稿画面を開くintent URL（text と url を分けて渡す＝URLが確実に乗る）
+  const xIntentURL = () =>
+    "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareBody())
+    + "&url=" + encodeURIComponent(SITE_URL);
 
   function fillCard() {
     const r = lastResult;
@@ -817,7 +827,7 @@
 
       document.getElementById("shareImg").src = canvas.toDataURL("image/png");
       document.getElementById("sharePreview").classList.add("show");
-      status.textContent = "画像ができました。「② 画像を保存・共有する」から投稿できます。";
+      status.textContent = "画像ができました。「② 画像を保存して X を開く」を押してください。";
     } catch (e) {
       status.textContent = "画像の生成に失敗しました。「文章とURLだけコピー」でのシェアをお試しください。";
     } finally {
@@ -828,25 +838,33 @@
   document.getElementById("shareBtn").addEventListener("click", async () => {
     const status = document.getElementById("shareStatus");
     if (!generatedBlob) { status.textContent = "先に「① シェア画像をつくる」を押してください。"; return; }
-    const file = new File([generatedBlob], "stress-test.png", { type:"image/png" });
+    const file = new File([generatedBlob], "crash-simulator.png", { type:"image/png" });
 
-    // 対応環境ならネイティブ共有シートも試す（画像つき）
+    // 画像つきネイティブ共有が使える環境なら、それが一番スムーズなので優先
     if (navigator.canShare && navigator.canShare({ files:[file] })) {
       try {
         await navigator.share({ files:[file], text:shareText() });
         status.textContent = "共有しました。";
         return;
-      } catch (e) { /* キャンセル・非対応時は保存にフォールバック */ }
+      } catch (e) { /* キャンセル・非対応時は下の保存＋X起動へ */ }
     }
-    // 保存（こちらが基本動作）
+
+    // 画像を保存
     const url = URL.createObjectURL(generatedBlob);
     const a = document.createElement("a");
-    a.href = url; a.download = "stress-test.png";
+    a.href = url; a.download = "crash-simulator.png";
     a.click();
     URL.revokeObjectURL(url);
-    status.textContent =
-      "画像を保存しました。次に Xアプリを開いて投稿画面で画像を添付し、"
-      + "「③ 文章とURLをコピー」でコピーした文章を貼り付ければ投稿できます。";
+
+    status.textContent = "画像を保存しました。Xの投稿画面を開きます…";
+
+    // 少し待ってからX投稿画面を開く（保存が終わってから飛ぶ自然な流れに）
+    setTimeout(() => {
+      window.open(xIntentURL(), "_blank");
+      status.textContent =
+        "Xの投稿画面が開きました。先ほど保存した画像を添付して投稿してください。"
+        + "（開かない場合は『文章とURLだけコピー』をお使いください）";
+    }, 800);
   });
 
   document.getElementById("textBtn").addEventListener("click", async () => {
@@ -857,8 +875,9 @@
       await navigator.clipboard.writeText(txt);
       status.textContent = "文章とURLをコピーしました。Xの投稿画面に貼り付けてください。";
     } catch (e) {
-      // クリップボード不可の環境向けにXの投稿画面を開く
-      window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(txt), "_blank");
+      // クリップボードが使えない環境では、文章入りのX投稿画面を開く
+      window.open(xIntentURL(), "_blank");
+      status.textContent = "Xの投稿画面を開きました。";
     }
   });
 </script>
