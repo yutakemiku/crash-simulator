@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ストレステスト｜あなたのポートフォリオは過去の暴落に耐えられるか</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0e1117;
+    --panel:   #1a212c;
+    --panel-2: #222b38;
+    --line:    #36414f;
+    --ink:     #f1efe9;
+    --ink-2:   #c4cad4;
+    --ink-3:   #8d96a4;
+    --red:     #ff5448;
+    --red-dim: #7a2620;
+    --green:   #57c596;
+    --green-dim:#1f4537;
+    --gold:    #e0b452;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { background:var(--bg); color:var(--ink); }
+  body {
+    font-family:"Noto Sans JP",sans-serif;
+    line-height:1.8; -webkit-font-smoothing:antialiased;
+    padding-bottom:80px; font-size:16px;
+  }
+  .serif { font-family:"Noto Serif JP",serif; }
+  .wrap { max-width:600px; margin:0 auto; padding:0 20px; }
+
+  /* ---------- header ---------- */
+  header {
+    text-align:center; padding:48px 0 36px;
+    background:radial-gradient(120% 80% at 50% 0%, #1c2533 0%, var(--bg) 70%);
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow {
+    font-size:12px; letter-spacing:0.34em; color:var(--gold);
+    font-weight:700; margin-bottom:18px; padding-left:0.34em;
+  }
+  h1 { font-size:clamp(26px,7vw,36px); font-weight:900; line-height:1.42; }
+  h1 .u {
+    background:linear-gradient(transparent 60%, var(--red-dim) 60%);
+    padding:0 2px;
+  }
+  .lede { margin-top:18px; font-size:15px; color:var(--ink-2); line-height:1.85; }
+
+  /* ---------- section ---------- */
+  section { padding:36px 0; }
+  section + section { border-top:1px solid var(--line); }
+  .step-head { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+  .step-no {
+    font-family:"Noto Serif JP",serif; font-size:15px; font-weight:800;
+    color:var(--bg); background:var(--gold);
+    border-radius:50%; width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  h2 { font-size:22px; font-weight:700; }
+  .hint { font-size:14.5px; color:var(--ink-2); margin-bottom:22px; line-height:1.8; }
+
+  /* ---------- asset inputs ---------- */
+  .asset {
+    display:grid; grid-template-columns:1fr 150px; gap:14px;
+    align-items:center; padding:16px 0; border-top:1px solid var(--line);
+  }
+  .asset:last-of-type { border-bottom:1px solid var(--line); }
+  .asset-name { font-weight:700; font-size:16px; line-height:1.55; }
+  .field {
+    display:flex; align-items:center; background:var(--panel);
+    border:1.5px solid var(--line); border-radius:9px;
+    transition:border-color .15s;
+  }
+  .field:focus-within { border-color:var(--gold); }
+  .field input {
+    border:0; outline:0; background:transparent; width:100%;
+    padding:13px 10px; font-size:17px; text-align:right;
+    color:var(--ink); font-family:"Noto Sans JP",sans-serif;
+  }
+  .field .u {
+    font-size:13px; color:var(--ink-2); padding:0 13px;
+    border-left:1px solid var(--line); white-space:nowrap;
+  }
+  .total {
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-top:22px; padding:18px 20px;
+    background:var(--panel); border-radius:11px;
+  }
+  .total .l { font-size:14px; letter-spacing:.08em; color:var(--ink-2); }
+  .total .v { font-size:27px; font-weight:900; }
+  .total .v .s { font-size:14px; color:var(--ink-2); font-weight:500; }
+
+  /* ---------- scenario cards ---------- */
+  .scn-grid { display:grid; gap:13px; }
+  .scn {
+    cursor:pointer; text-align:left; width:100%;
+    background:var(--panel); border:1.5px solid var(--line);
+    border-radius:13px; padding:18px 19px;
+    font-family:inherit; color:var(--ink);
+    transition:border-color .15s, background .15s;
+    position:relative; overflow:hidden;
+  }
+  .scn:active { background:var(--panel-2); }
+  .scn.active { border-color:var(--red); background:var(--panel-2); }
+  .scn.active::before {
+    content:""; position:absolute; left:0; top:0; bottom:0; width:5px;
+    background:var(--red);
+  }
+  .scn-top { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .scn-name { font-size:18px; font-weight:800; }
+  .scn-yr { font-size:13px; color:var(--ink-2); font-family:"Noto Serif JP",serif; white-space:nowrap; }
+  .scn-desc { font-size:14.5px; color:var(--ink-2); margin-top:7px; line-height:1.75; }
+
+  /* ---------- result ---------- */
+  #result { display:none; }
+  #result.show { display:block; animation:fade .5s ease; }
+  @keyframes fade { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
+
+  .verdict {
+    text-align:center; background:var(--panel);
+    border:1.5px solid var(--line); border-radius:15px;
+    padding:30px 22px; margin-bottom:14px;
+  }
+  .verdict .vn { font-size:14px; color:var(--ink-2); }
+  .big-loss {
+    font-family:"Noto Serif JP",serif; font-weight:900;
+    font-size:clamp(42px,13vw,64px); color:var(--red);
+    line-height:1.18; margin:10px 0 8px;
+  }
+  .big-loss .y { font-size:.46em; vertical-align:.24em; margin-right:.05em; }
+  .v-sub { font-size:15px; color:var(--ink-2); line-height:1.8; }
+  .v-sub b { color:var(--ink); font-weight:700; }
+  .saved-badge {
+    display:none; margin-top:14px; padding:9px 14px;
+    background:var(--green-dim); border:1px solid var(--green);
+    border-radius:9px; font-size:14px; color:var(--green); font-weight:700;
+  }
+  .saved-badge.show { display:inline-block; }
+
+  .bar-block { margin:6px 0; }
+  .bar-track { height:44px; background:var(--red-dim); border-radius:9px; overflow:hidden; }
+  .bar-fill {
+    height:100%; width:0;
+    background:linear-gradient(90deg,#3a4a5e,#57c596);
+    transition:width .35s cubic-bezier(.2,.7,.2,1);
+  }
+  .bar-cap {
+    display:flex; justify-content:space-between;
+    font-size:13px; color:var(--ink-2); margin-top:9px;
+  }
+
+  .bd { margin-top:28px; }
+  .bd h3 {
+    font-size:14px; color:var(--ink-2); font-weight:700;
+    padding-bottom:9px; border-bottom:1px solid var(--line); margin-bottom:2px;
+  }
+  .bd-row {
+    display:grid; grid-template-columns:1fr auto auto; gap:12px;
+    align-items:baseline; padding:13px 0; border-bottom:1px solid var(--line);
+    font-size:15px;
+  }
+  .bd-row .nm { color:var(--ink); }
+  .bd-row .lo {
+    text-align:right; font-weight:800;
+    font-family:"Noto Serif JP",serif; white-space:nowrap;
+  }
+  .bd-row .lo.neg { color:var(--red); }
+  .bd-row .lo.pos { color:var(--green); }
+  .bd-row .rt { text-align:right; font-size:13px; color:var(--ink-2); white-space:nowrap; }
+
+  .note {
+    margin-top:26px; padding:20px; background:var(--panel);
+    border-radius:11px; border-left:4px solid var(--gold);
+    font-size:15px; color:var(--ink-2); line-height:1.85;
+  }
+  .note b { color:var(--ink); font-weight:700; }
+  .note .fine { display:block; margin-top:12px; font-size:13px; color:var(--ink-3); }
+
+  /* ---------- what-if sliders ---------- */
+  .whatif { margin-top:30px; }
+  .whatif-head { font-size:18px; font-weight:800; margin-bottom:6px; }
+  .whatif-sub {
+    font-size:14px; color:var(--ink-2); margin-bottom:22px; line-height:1.8;
+  }
+  .slider-box {
+    background:var(--panel); border:1.5px solid var(--line);
+    border-radius:12px; padding:18px 18px 14px; margin-bottom:14px;
+  }
+  .slider-top {
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:4px;
+  }
+  .slider-label { font-size:15px; font-weight:700; }
+  .slider-val {
+    font-family:"Noto Serif JP",serif; font-size:20px; font-weight:900;
+    color:var(--gold);
+  }
+  .slider-desc { font-size:12.5px; color:var(--ink-2); margin-bottom:14px; line-height:1.6; }
+  input[type=range] {
+    -webkit-appearance:none; appearance:none;
+    width:100%; height:8px; border-radius:4px;
+    background:var(--line); outline:none; margin:4px 0;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; appearance:none;
+    width:30px; height:30px; border-radius:50%;
+    background:var(--gold); border:3px solid var(--bg);
+    cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.5);
+  }
+  input[type=range]::-moz-range-thumb {
+    width:30px; height:30px; border-radius:50%;
+    background:var(--gold); border:3px solid var(--bg);
+    cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.5);
+  }
+  .slider-scale {
+    display:flex; justify-content:space-between;
+    font-size:11.5px; color:var(--ink-3); margin-top:2px;
+  }
+  .slider-disabled { opacity:.4; pointer-events:none; }
+  .slider-na {
+    font-size:12.5px; color:var(--ink-3); margin-top:6px; display:none;
+  }
+  .reset-btn {
+    width:100%; margin-top:4px; padding:11px;
+    background:transparent; border:1.5px solid var(--line);
+    border-radius:10px; color:var(--ink-2); font-size:13.5px;
+    font-family:inherit; cursor:pointer;
+  }
+  .reset-btn:active { background:var(--panel); }
+
+  .whatif-result {
+    margin-top:18px; padding:20px;
+    background:var(--panel-2); border:1.5px solid var(--line);
+    border-radius:12px; transition:border-color .25s;
+  }
+  .whatif-result.improved { border-color:var(--green); }
+  .whatif-result.worse { border-color:var(--red); }
+  .compare {
+    display:flex; align-items:center; justify-content:center;
+    gap:13px; font-family:"Noto Serif JP",serif; font-weight:900;
+  }
+  .compare .before { font-size:23px; color:var(--ink-3); }
+  .compare .arrow  { font-size:19px; color:var(--ink-2); }
+  .compare .after  { font-size:31px; color:var(--ink); transition:color .25s; }
+  .whatif-result.improved .after { color:var(--green); }
+  .whatif-result.worse .after { color:var(--red); }
+  .whatif-msg {
+    text-align:center; margin-top:11px; font-size:14.5px;
+    color:var(--ink-2); line-height:1.7;
+  }
+  .whatif-msg b { font-weight:700; }
+
+  .again {
+    margin-top:22px; text-align:center; font-size:14px;
+    color:var(--ink-2); line-height:1.75;
+  }
+
+  footer {
+    text-align:center; padding:36px 20px 0;
+    font-size:13px; color:var(--ink-2);
+  }
+  .disclaimer {
+    max-width:560px; margin:14px auto 0; font-size:12px;
+    color:var(--ink-3); line-height:1.85;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">PORTFOLIO STRESS TEST</div>
+    <h1 class="serif">過去の暴落が<span class="u">いま起きたら</span>、<br>あなたの資産はいくら残るか</h1>
+    <p class="lede">リーマン・コロナ・ITバブルの下落を、<br>あなたのいまの資産に当てはめて試算します。</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- STEP 1 -->
+  <section>
+    <div class="step-head"><span class="step-no">1</span><h2>いまの資産を入力</h2></div>
+    <p class="hint">ざっくりで構いません。持っていない資産は空のままでOKです。単位は万円。</p>
+    <div id="assets"></div>
+    <div class="total">
+      <span class="l">資産合計</span>
+      <span class="v" id="totalVal">—<span class="s"> 万円</span></span>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section>
+    <div class="step-head"><span class="step-no">2</span><h2>暴落シナリオを選ぶ</h2></div>
+    <p class="hint">同じ「暴落」でも、下げる資産と守られる資産はまるで違います。</p>
+    <div class="scn-grid" id="scenarios"></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result">
+    <div class="step-head"><span class="step-no">✓</span><h2>試算結果</h2></div>
+
+    <div class="verdict">
+      <div class="vn" id="rName"></div>
+      <div class="big-loss" id="rLoss"></div>
+      <div class="v-sub" id="rSub"></div>
+      <div class="saved-badge" id="savedBadge"></div>
+    </div>
+
+    <div class="bar-block">
+      <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+      <div class="bar-cap">
+        <span>暴落後に残る資産</span>
+        <span id="barVal"></span>
+      </div>
+    </div>
+
+    <div class="bd">
+      <h3>資産別の内訳</h3>
+      <div id="bdRows"></div>
+    </div>
+
+    <div class="note" id="note"></div>
+
+    <!-- WHAT-IF SLIDERS -->
+    <div class="whatif">
+      <div class="whatif-head serif">もし、配分を変えていたら?</div>
+      <p class="whatif-sub">スライダーを動かすと、その配分でこの暴落を受けた場合の被害がリアルタイムで再計算されます。資産の総額は変わりません。</p>
+      <div id="sliders"></div>
+      <button class="reset-btn" id="resetBtn">スライダーを元に戻す</button>
+
+      <div class="whatif-result" id="whatifResult">
+        <div class="compare">
+          <span class="before" id="wBefore"></span>
+          <span class="arrow">→</span>
+          <span class="after" id="wAfter"></span>
+        </div>
+        <div class="whatif-msg" id="wMsg">スライダーを動かして試してみてください。</div>
+      </div>
+    </div>
+
+    <p class="again">STEP 1 の数字を書き換えれば、ゼロから再計算もできます。</p>
+  </section>
+
+</div>
+
+<footer>
+  入力した数字はこの端末内だけで処理され、どこにも送信・保存されません。
+  <div class="disclaimer">
+    本ツールは過去の代表的な下落率にもとづく概算であり、将来の結果や特定の暴落を予測・保証するものではありません。
+    各資産の下落率は歴史的なおおよその値です。「もし、配分を変えていたら」の試算も過去データにもとづく仮定の計算です。
+    本ツールは特定の金融商品の売買を推奨するものではなく、投資助言を行うものではありません。投資判断はご自身の責任で行ってください。
+  </div>
+</footer>
+
+<script>
+  const ASSETS = [
+    { id:"world",  name:"全世界株（オルカン等）" },
+    { id:"us",     name:"米国株インデックス（S&P500等）" },
+    { id:"jp",     name:"日本株" },
+    { id:"single", name:"個別株（集中投資・グロース株中心）" },
+    { id:"bond",   name:"債券" },
+    { id:"crypto", name:"暗号資産" },
+    { id:"cash",   name:"現金・預金" },
+  ];
+  const KEYS = ASSETS.map(a => a.id);
+
+  const SCENARIOS = [
+    {
+      id:"gfc", name:"リーマンショック", year:"2007–2009",
+      desc:"金融システムが揺らぎ、世界中の株式がほぼ全面安に。逃げ場が少なかった暴落。",
+      rates:{ world:56, us:55, jp:60, single:65, bond:-5, crypto:0, cash:0 },
+      cryptoNote:true,
+      comment:"リーマンショックの特徴は<b>逃げ場がほとんどなかった</b>こと。世界中の株式が連動して下げ、唯一プラスを保ったのは国債でした。株式に偏ったポートフォリオほど深く沈みます。"
+    },
+    {
+      id:"covid", name:"コロナショック", year:"2020年2–3月",
+      desc:"わずか1ヶ月で急落。ただし回復も最速級で、多くの指数は半年ほどで戻した。",
+      rates:{ world:34, us:34, jp:31, single:42, bond:-1, crypto:50, cash:0 },
+      comment:"コロナショックは<b>速くて深く、回復も速かった</b>のが特徴。本当に怖いのは下落率より、底値で売ってしまうこと。この数字に耐えられないと感じたなら、配分を見直すサインです。"
+    },
+    {
+      id:"dotcom", name:"ITバブル崩壊", year:"2000–2002",
+      desc:"ハイテク・グロース株が壊滅的に下落。一方で債券はむしろ上昇した。",
+      rates:{ world:47, us:47, jp:44, single:78, bond:-15, crypto:0, cash:0 },
+      cryptoNote:true,
+      comment:"ITバブル崩壊は<b>中身で明暗がはっきり分かれた</b>暴落。グロース株は壊滅した一方、債券は上昇しました。個別株の行が突出して赤いなら、この局面で最も弱いポジションを抱えているということです。"
+    },
+  ];
+
+  /* スライダー定義。
+     value（0〜max %）を受け取り、元配分 v を変換した配分を返す。
+     いずれも資産総額を保存する（移すだけ）。 */
+  const SLIDERS = [
+    {
+      id:"cash",
+      label:"現金の比率",
+      desc:"値動きの大きい資産から取り崩して現金クッションを厚くする",
+      min:0, max:50, step:5, unit:"%",
+      // 利用可能か（リスク資産がある程度ないと意味がない）
+      enabled:v => ["world","us","jp","single","crypto"].reduce((s,k)=>s+v[k],0) > 0,
+      naMsg:"取り崩せる株式・暗号資産がないため調整できません",
+      // 現状の現金比率を初期値に
+      initial:v => { const t=sum(v); return t>0 ? Math.round(v.cash/t*100/5)*5 : 0; },
+      apply(v, pct){
+        const t = sum(v);
+        const target = t * pct/100;
+        const n = {...v};
+        const rk = ["crypto","single","us","jp","world"];
+        if (target >= v.cash){
+          // 現金を増やす：リスク資産から比例で取り崩す
+          let pool = rk.reduce((s,k)=>s+n[k],0);
+          const need = Math.min(target - v.cash, pool);
+          if (pool>0) rk.forEach(k => n[k] -= need*(n[k]/pool));
+          n.cash += (pool>0?need:0);
+        } else {
+          // 現金を減らす：全世界株へ回す
+          const move = v.cash - target;
+          n.cash -= move;
+          n.world += move;
+        }
+        return n;
+      }
+    },
+    {
+      id:"diversify",
+      label:"個別株を全世界株に移す割合",
+      desc:"集中投資の一部を分散インデックスに振り替える",
+      min:0, max:100, step:10, unit:"%",
+      enabled:v => v.single > 0,
+      naMsg:"個別株の入力がないため調整できません",
+      initial:() => 0,
+      apply(v, pct){
+        const n = {...v};
+        const move = v.single * pct/100;
+        n.single -= move;
+        n.world  += move;
+        return n;
+      }
+    },
+    {
+      id:"bond",
+      label:"株式を債券に移す割合",
+      desc:"株式（全世界・米国・日本・個別）の一部を債券に振り替える",
+      min:0, max:60, step:10, unit:"%",
+      enabled:v => ["world","us","jp","single"].reduce((s,k)=>s+v[k],0) > 0,
+      naMsg:"振り替えられる株式の入力がないため調整できません",
+      initial:() => 0,
+      apply(v, pct){
+        const n = {...v};
+        ["world","us","jp","single"].forEach(k=>{
+          const move = v[k] * pct/100;
+          n[k]  -= move;
+          n.bond += move;
+        });
+        return n;
+      }
+    },
+  ];
+
+  // ---- helpers ----
+  const sum = v => KEYS.reduce((s,k)=>s+(v[k]||0),0);
+  const fmt = n => Math.round(n).toLocaleString("ja-JP");
+  function lossOf(v, s){
+    let loss = 0;
+    KEYS.forEach(k => loss += (v[k]||0) * (s.rates[k]||0) / 100);
+    return loss;
+  }
+
+  // STEP1
+  const assetsEl = document.getElementById("assets");
+  const inputs = {};
+  ASSETS.forEach(a => {
+    const row = document.createElement("div");
+    row.className = "asset";
+    row.innerHTML = `
+      <div class="asset-name">${a.name}</div>
+      <div class="field">
+        <input type="number" min="0" inputmode="numeric" placeholder="0" id="in-${a.id}">
+        <span class="u">万円</span>
+      </div>`;
+    assetsEl.appendChild(row);
+    inputs[a.id] = row.querySelector("input");
+    inputs[a.id].addEventListener("input", () => { recalcTotal(); reRun(); });
+  });
+  const getVals = () => {
+    const v = {};
+    ASSETS.forEach(a => v[a.id] = Math.max(0, Number(inputs[a.id].value) || 0));
+    return v;
+  };
+  function recalcTotal() {
+    const t = sum(getVals());
+    document.getElementById("totalVal").innerHTML =
+      (t > 0 ? fmt(t) : "—") + `<span class="s"> 万円</span>`;
+  }
+
+  // STEP2
+  const scnEl = document.getElementById("scenarios");
+  let active = null;
+  SCENARIOS.forEach(s => {
+    const b = document.createElement("button");
+    b.className = "scn";
+    b.innerHTML = `
+      <div class="scn-top">
+        <span class="scn-name serif">${s.name}</span>
+        <span class="scn-yr">${s.year}</span>
+      </div>
+      <div class="scn-desc">${s.desc}</div>`;
+    b.addEventListener("click", () => {
+      active = s;
+      document.querySelectorAll(".scn").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      run(s);
+    });
+    scnEl.appendChild(b);
+  });
+
+  // ---- スライダー生成 ----
+  const slidersEl = document.getElementById("sliders");
+  const sliderInputs = {};
+  SLIDERS.forEach(sl => {
+    const box = document.createElement("div");
+    box.className = "slider-box";
+    box.id = "sb-" + sl.id;
+    box.innerHTML = `
+      <div class="slider-top">
+        <span class="slider-label">${sl.label}</span>
+        <span class="slider-val" id="sv-${sl.id}">0%</span>
+      </div>
+      <div class="slider-desc">${sl.desc}</div>
+      <input type="range" id="sl-${sl.id}"
+        min="${sl.min}" max="${sl.max}" step="${sl.step}" value="0">
+      <div class="slider-scale"><span>${sl.min}%</span><span>${sl.max}%</span></div>
+      <div class="slider-na" id="na-${sl.id}">${sl.naMsg}</div>`;
+    slidersEl.appendChild(box);
+    const inp = box.querySelector("input");
+    sliderInputs[sl.id] = inp;
+    inp.addEventListener("input", () => {
+      document.getElementById("sv-"+sl.id).textContent = inp.value + sl.unit;
+      renderWhatif();
+    });
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    initSliders();
+    renderWhatif();
+  });
+
+  const reRun = () => { if (active) run(active); };
+
+  // スライダーの初期値・有効/無効を、現在の入力に合わせて設定
+  function initSliders() {
+    const v = getVals();
+    SLIDERS.forEach(sl => {
+      const inp = sliderInputs[sl.id];
+      const ok = sl.enabled(v);
+      const box = document.getElementById("sb-"+sl.id);
+      const na  = document.getElementById("na-"+sl.id);
+      if (ok) {
+        box.classList.remove("slider-disabled");
+        na.style.display = "none";
+        const init = Math.min(sl.max, Math.max(sl.min, sl.initial(v)));
+        inp.value = init;
+      } else {
+        box.classList.add("slider-disabled");
+        na.style.display = "block";
+        inp.value = 0;
+      }
+      document.getElementById("sv-"+sl.id).textContent = inp.value + sl.unit;
+    });
+  }
+
+  // スライダーをすべて順に適用した配分
+  function appliedVals() {
+    let v = getVals();
+    SLIDERS.forEach(sl => {
+      if (!sl.enabled(getVals())) return;
+      const pct = Number(sliderInputs[sl.id].value);
+      v = sl.apply(v, pct);
+      // 微小な負値を丸める
+      KEYS.forEach(k => { if (v[k] < 0.0001) v[k] = 0; });
+    });
+    return v;
+  }
+
+  function run(s) {
+    const v = getVals(), t = sum(v);
+    if (t <= 0) { alert("STEP 1 で資産を入力してください。"); return; }
+
+    initSliders();
+
+    const loss = lossOf(v, s);
+    const after = t - loss;
+    const pct = loss / t * 100;
+
+    document.getElementById("rName").textContent = s.name + "（" + s.year + "）が再来したら";
+    document.getElementById("rLoss").innerHTML =
+      (loss >= 0 ? "−" : "＋") + `<span class="y">¥</span>` + fmt(Math.abs(loss)) + "万";
+    document.getElementById("rSub").innerHTML =
+      `資産合計 <b>${fmt(t)}万円</b> が約 <b>${Math.abs(pct).toFixed(1)}%</b> ` +
+      (loss >= 0 ? "目減り" : "増加") + `<br>残り <b>${fmt(after)}万円</b>`;
+
+    const left = Math.max(0, Math.min(100, after / t * 100));
+    requestAnimationFrame(() => document.getElementById("barFill").style.width = left + "%");
+    document.getElementById("barVal").textContent = fmt(after) + "万円（" + left.toFixed(0) + "%）";
+
+    // 内訳
+    const rows = [];
+    ASSETS.forEach(a => {
+      if (v[a.id] <= 0) return;
+      const rate = s.rates[a.id] || 0;
+      rows.push({ name:a.name, rate, l:v[a.id]*rate/100 });
+    });
+    const bd = document.getElementById("bdRows");
+    bd.innerHTML = "";
+    rows.sort((a,b) => b.l - a.l).forEach(r => {
+      const neg = r.l >= 0;
+      const el = document.createElement("div");
+      el.className = "bd-row";
+      el.innerHTML = `
+        <span class="nm">${r.name}</span>
+        <span class="lo ${neg?'neg':'pos'}">${neg?'−':'＋'}${fmt(Math.abs(r.l))}万</span>
+        <span class="rt">${r.rate>=0?'-':'+'}${Math.abs(r.rate)}%</span>`;
+      bd.appendChild(el);
+    });
+
+    let note = s.comment;
+    if (s.cryptoNote && v.crypto > 0)
+      note += `<span class="fine">※ 暗号資産は当時存在しなかったため、参考値として全世界株並みの下落で計算しています。</span>`;
+    document.getElementById("note").innerHTML = note;
+
+    renderWhatif();
+
+    const res = document.getElementById("result");
+    res.classList.add("show");
+    res.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  // ---- 「もし、配分を変えていたら」の再計算 ----
+  function renderWhatif() {
+    if (!active) return;
+    const orig = getVals();
+    const baseLoss = lossOf(orig, active);
+    const newV = appliedVals();
+    const newLoss = lossOf(newV, active);
+    const saved = baseLoss - newLoss;   // プラス＝被害が減った
+
+    document.getElementById("wBefore").textContent = "−" + fmt(Math.abs(baseLoss)) + "万";
+    document.getElementById("wAfter").textContent  =
+      (newLoss>=0?"−":"＋") + fmt(Math.abs(newLoss)) + "万";
+
+    const box = document.getElementById("whatifResult");
+    const msg = document.getElementById("wMsg");
+    box.classList.remove("improved","worse");
+
+    const moved = SLIDERS.some(sl => Number(sliderInputs[sl.id].value) !==
+      (sl.enabled(orig) ? Math.min(sl.max,Math.max(sl.min,sl.initial(orig))) : 0));
+
+    if (!moved) {
+      msg.innerHTML = "スライダーを動かして試してみてください。";
+    } else if (Math.abs(saved) < 0.5) {
+      msg.innerHTML = "この暴落では被害額はほぼ変わりません。";
+    } else if (saved > 0) {
+      box.classList.add("improved");
+      msg.innerHTML = `この配分なら、被害を <b>${fmt(saved)}万円</b> 抑えられた計算です。`;
+    } else {
+      box.classList.add("worse");
+      msg.innerHTML = `この配分だと、逆に <b>${fmt(Math.abs(saved))}万円</b> 被害が増える計算です。`;
+    }
+
+    const badge = document.getElementById("savedBadge");
+    if (moved && saved > 0.5) {
+      badge.textContent = "配分を見直せば −" + fmt(saved) + "万円 ぶん守れた";
+      badge.classList.add("show");
+    } else {
+      badge.classList.remove("show");
+    }
+  }
+</script>
+</body>
+</html>
